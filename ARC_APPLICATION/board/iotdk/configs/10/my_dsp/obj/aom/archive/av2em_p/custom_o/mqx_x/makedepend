@@ -1,0 +1,30 @@
+aom.o: D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom.c \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom_private.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom_private_cconv_arc.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\inc\aom.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\inc\aom_types.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom_private_arc.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom_move.c
+fixup_overlay_package.o: \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\fixup_overlay_package.c \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\fixup_overlay_package.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\inc\aom.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\inc\aom_types.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\c\inc\setjmp.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\c\inc\string.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\c\inc\features.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\c\inc\sizet.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\c\inc\_na.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\c\inc\xlocale.h
+aom_tiny.o: \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom_tiny.c \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom.c \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom_private.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom_private_cconv_arc.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\inc\aom.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\inc\aom_types.h \
+  D:\ProgramFile\MetaWare\MetaWare\arc\lib\src\aom\aom_g\aom_private_arc.h
+aom_handlers.o:	 D:/ProgramFile/MetaWare/MetaWare/arc/bin/arcexlib.s D:/ProgramFile/MetaWare/MetaWare/arc/lib/src/aom/aom_g/aom_handlers.s D:/ProgramFile/MetaWare/MetaWare/arc/lib/src/aom/aom_g/aom_handler_defines.i
+
+aom_overlay_end.o:	 D:/ProgramFile/MetaWare/MetaWare/arc/bin/arcexlib.s D:/ProgramFile/MetaWare/MetaWare/arc/lib/src/aom/aom_g/aom_overlay_end.s
+
