@@ -30,4 +30,5 @@ Repo for Arc IoT contest containing the server and app of the system and the tes
 <h2>使用說明</h2>
 <h4>Arc app</h4>
 
+<img src=https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app.jpg width="20%">
 
