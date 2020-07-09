@@ -7,9 +7,10 @@ Repo for Arc IoT contest containing the server and app of the system and the tes
 並且將相應的指令傳送到指定子機，同時利用安設在按鈕開關或旋鈕上的子機<br/>接收指令並且動作，以達成相應的家電控制；
 另外，如果不在空間內無法使用語音進行控制，則也可以選擇使用手機頁面對Arc IoTDK<br/>主控模組下達指令，達成遠距操控的工作；
 希望透過非侵入式智慧家電系統，讓更多人享受到現代物聯網所帶來的便利。
+## 系統架構
+<img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/brief_architecture.PNG" width="90%" />
 
 ## 硬體架構
-
 
 
 ## 軟體架構
