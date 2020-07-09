@@ -23,7 +23,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/regRecycler"
             android:layout_width="match_parent"
-            android:layout_height="350dp"
+            android:layout_height="250dp"
             android:padding="10dp"
             android:layout_marginLeft="35dp"
             android:layout_marginRight="35dp"
@@ -35,9 +35,16 @@
             android:id="@+id/btnregister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
             android:layout_gravity="center"
-            android:layout_marginBottom="50dp"
             android:text="新裝置" />
+        <Button
+            android:id="@+id/btnBT"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp"
+            android:layout_gravity="center"
+            android:text="IoTDK 連線" />
 
     </LinearLayout>
 

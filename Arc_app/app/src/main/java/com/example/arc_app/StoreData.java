@@ -2,9 +2,9 @@ package com.example.arc_app;
 
 import android.content.Context;
 import android.util.Log;
-
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 import static com.example.arc_app.MainActivity.regDevices;
 import static com.example.arc_app.MainActivity.filename;
 
@@ -21,6 +21,7 @@ public class StoreData {
     public void loadData(){
         //open file
         try {
+            //沒有此檔案的話，在結束app時fout會自動創造一個
             fin = mContext.openFileInput(filename);
         }catch (Exception e){
             Log.d(TAG,e.toString());
@@ -28,11 +29,13 @@ public class StoreData {
         //get data
         try {
             int c;
-            String temp="";
+            int i=0;
+            byte[] temp = new byte[99999];
             while( (c = fin.read()) != -1){
-                temp = temp + (char)c;
+                temp[i] = (byte) c;
+                i++;
             }
-            String[] array = temp.split(" ");
+            String[] array = (new String(temp,"utf-8")).split(" ");
             for(String device : array)
                 if(!device.trim().isEmpty())
                     regDevices.add(device);
@@ -62,7 +65,7 @@ public class StoreData {
         }
         data.trim();
         try {
-            fout.write(data.getBytes());
+            fout.write(data.getBytes("utf-8"));
         }catch (Exception e){
             Log.d(TAG,e.toString());
         }
