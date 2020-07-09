@@ -22,7 +22,7 @@ Repo for Arc IoT contest containing the server and app of the system and the tes
 2. 點擊"新裝置"按鈕，可以輸入裝置ID進行註冊。
 3. 短按為觸發裝置，長按為刪除裝置。
 #### Arc App - wifi設定
-
+<img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app_BLEscan.jpg" width="20%" /> <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/ARC_app_BLEconnect.jpg" width="20%" /> <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app_wifi_setup.jpg" width="20%" />
 
 
 1. 點擊"IOTDK連線"按鈕，可以搜尋藍芽裝置。
