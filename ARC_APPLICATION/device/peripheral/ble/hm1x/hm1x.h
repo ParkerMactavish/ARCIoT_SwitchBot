@@ -35,7 +35,7 @@
 #if defined(BOARD_EMSK) || defined(BOARD_HSDK)
 #define HM_1X_UART_ID		DW_UART_0_ID
 #elif defined(BOARD_EMSDP)|| defined(BOARD_IOTDK)
-#define HM_1X_UART_ID		DFSS_UART_1_ID
+#define HM_1X_UART_ID		DFSS_UART_2_ID
 #else
 #warning hm1x is not supported on this board!
 #endif

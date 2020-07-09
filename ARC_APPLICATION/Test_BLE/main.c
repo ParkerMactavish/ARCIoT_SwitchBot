@@ -30,8 +30,9 @@
 
 #include "embARC.h"
 #include "embARC_debug.h"
-
+/*
 #include "rn4020.h"
+*/
 
 #if defined(BOARD_IOTDK)
 #define RN4020_UART_ID DFSS_UART_3_ID
@@ -56,7 +57,8 @@
 #define RN4020_CMD_PIN 3
 
 #endif
-
+/* RN4020 Part */
+/*
 RN4020_DEFINE(rn4020_ble, RN4020_UART_ID, RN4020_WAKE_SW_GPIO, RN4020_WAKE_SW_PIN
 	, RN4020_WAKE_HW_GPIO, RN4020_WAKE_HW_PIN, RN4020_CMD_GPIO, RN4020_CMD_PIN);
 
@@ -65,14 +67,13 @@ uint8_t test_private_services_uuid[RN4020_PRIVATE_UUID_LENGTH_BYTES] =
 
 uint8_t test_private_characteristic_0_uuid[RN4020_PRIVATE_UUID_LENGTH_BYTES] =
 				{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F};
-
-uint8_t test_private_characteristic_1_uuid[RN4020_PRIVATE_UUID_LENGTH_BYTES] =
-				{0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F};
+*/
+// uint8_t test_private_characteristic_1_uuid[RN4020_PRIVATE_UUID_LENGTH_BYTES] =
+				// {0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F};
 
 int main(void) {
-
-	uint8_t battery = 100;
-
+  /* rn4020 Part */
+  /*
 	EMBARC_PRINTF("rn4020 test application\r\n");
 
 	rn4020_setup(rn4020_ble);
@@ -80,18 +81,16 @@ int main(void) {
 	rn4020_set_dev_name(rn4020_ble, "embARC");
 
 
-	rn4020_set_services(rn4020_ble, RN4020_SERVICE_DEVICE_INFORMATION |
-					    RN4020_SERVICE_BATTERY | RN4020_SERVICE_USER_DEFINED);
-
+	rn4020_set_services(rn4020_ble, RN4020_SERVICE_USER_DEFINED);
 
 	rn4020_clear_private(rn4020_ble);
 	rn4020_add_prv_service(rn4020_ble, test_private_services_uuid);
 	rn4020_add_prv_char(rn4020_ble, test_private_characteristic_0_uuid,
-			RN4020_PRIVATE_CHAR_PROP_NOTIFY | RN4020_PRIVATE_CHAR_PROP_READ,
-			5, RN4020_PRIVATE_CHAR_SEC_NONE);
-	rn4020_add_prv_char(rn4020_ble, test_private_characteristic_1_uuid,
 			RN4020_PRIVATE_CHAR_PROP_WRITE | RN4020_PRIVATE_CHAR_PROP_READ,
-			5, RN4020_PRIVATE_CHAR_SEC_NONE);
+			20, RN4020_PRIVATE_CHAR_SEC_NONE);
+	// rn4020_add_prv_char(rn4020_ble, test_private_characteristic_1_uuid,
+			// RN4020_PRIVATE_CHAR_PROP_WRITE | RN4020_PRIVATE_CHAR_PROP_READ,
+			// 5, RN4020_PRIVATE_CHAR_SEC_NONE);
 
 	rn4020_set_features(rn4020_ble, RN4020_FEATURE_SERVER_ONLY);
 	//rn4020_remove_bond(rn4020_ble);
@@ -102,25 +101,22 @@ int main(void) {
 	rn4020_advertise(rn4020_ble);
 
 	rn4020_refresh_handle_uuid_table(rn4020_ble);
-  
-  char chrIn[4];
-  char* s;
+  */
+  EMBARC_PRINTF("HM10 Test");
+  // char chrFromDbg[4], 
+  uint8_t chrFromBLE[100];
 	while (1) {
-    scanf("%s", chrIn);
-    printf("%s", chrIn);
-    for(s = chrIn; *s; s++);
-		// rn4020_battery_set_level(rn4020_ble, battery--);
-		rn4020_server_write_prv_char(rn4020_ble, test_private_characteristic_0_uuid, chrIn, s-chrIn);
-		//rn4020_advertise(rn4020_ble);
-		// board_delay_ms(2000, 0);
-		if(rn4020_ble->need_advertise)
-		{
-			rn4020_ble->need_advertise = 0;
-			rn4020_advertise(rn4020_ble);
-		// }
-		// if (battery < 30) {
-		// 	battery = 100;
-		}
+    if(!rn4020_ble->connected){
+      chrFromBLE[0] = 'n';
+      rn4020_server_write_prv_char(rn4020_ble, test_private_characteristic_0_uuid, chrFromBLE, 1);
+    }
+    else{
+      int32_t retVal = rn4020_server_read_prv_char(rn4020_ble, test_private_characteristic_0_uuid, chrFromBLE, 20);
+      board_delay_ms(100, 0);
+      if(retVal == 0)
+          printf("Captured in Main: %s\n", chrFromBLE);
+    }
+    board_delay_ms(100, 0);
 	}
 
 }

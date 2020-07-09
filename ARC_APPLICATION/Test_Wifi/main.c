@@ -36,26 +36,23 @@
 #include <stdio.h>
 #include <string.h>
 
-#define WIFI_SSID   "\"AndroidAP\""
-#define WIFI_PWD    "\"asdfghjk\""
+char WIFI_SSID[] = "\"UnknownAP\"";
+char WIFI_PWD[] = "\"qwertyui\"";
 
-static char http_get[] = "GET /";
-static char http_IDP[] = "+IPD,";
-static char http_html_header[] = "HTTP/1.x 200 OK\r\nContent-type: text/html\r\n\r\n";
-static char http_html_body_1[] =
-    "<html><head><title>ESP8266_AT_HttpServer</title></head><body><h1>Welcome to this Website</h1>";
-static char http_html_body_2[] =
-    "<p>This Website is used to test the AT command about HttpServer of ESP8266.</p></body></html>";
+// static char http_get[] = "GET /";
+// static char http_IDP[] = "+IPD,";
+// static char http_html_header[] = "HTTP/1.x 200 OK\r\nContent-type: text/html\r\n\r\n";
+// static char http_html_body_1[] =
+//     "<html><head><title>ESP8266_AT_HttpServer</title></head><body><h1>Welcome to this Website</h1>";
+// static char http_html_body_2[] =
+//     "<p>This Website is used to test the AT command about HttpServer of ESP8266.</p></body></html>";
 
-static char http_client_req[] = 
-    "GET /hello/ HTTP/1.1\r\n\r\n";
+static char http_client_req[] = "GET /hello/ HTTP/1.1\r\n\r\n";
 // static char http_server_buf[2048];
 static char http_client_buf[2048];
 
 int main(void)
 {
-	char *conn_buf;
-
 	//ESP8266 Init
 	EMBARC_PRINTF("============================ Init ============================\n");
 
@@ -98,6 +95,7 @@ int main(void)
     esp8266_passthr_start(esp8266);
     board_delay_ms(1000, 1);
   }
+  memset(http_client_buf, 0, 2048);
 	while (1) {
 		// memset(http_server_buf, 0, sizeof(http_server_buf));
 		// at_read(esp8266->p_at ,http_server_buf ,1000);
@@ -128,8 +126,11 @@ int main(void)
 
 		// 	EMBARC_PRINTF("Send Finish\n");
 		// }
+    board_delay_ms(1000, 1);
     esp8266_passthr_write(esp8266, http_client_req, sizeof(http_client_req)-1);
-	  board_delay_ms(500, 1);
+	  memset(http_client_buf, 0, 2048);
+    at_read(esp8266->p_at, http_client_buf, 2048);
+    EMBARC_PRINTF("Received: %s\n", http_client_buf);
     // memset(http_client_buf, 0, sizeof(http_client_buf));
     // esp8266_read(esp8266, http_client_buf, INT_MAX);
     // EMBARC_PRINTF("%s", http_client_buf);

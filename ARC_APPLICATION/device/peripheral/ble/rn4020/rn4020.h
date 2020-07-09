@@ -178,8 +178,7 @@ extern int32_t rn4020_refresh_handle_uuid_table(RN4020_DEF_PTR rn4020);
 extern int32_t rn4020_clear_private(RN4020_DEF_PTR rn4020);
 extern int32_t rn4020_is_connected(RN4020_DEF_PTR rn4020);
 extern int32_t rn4020_add_prv_service(RN4020_DEF_PTR rn4020, const uint8_t *uuid);
-extern int32_t rn4020_add_prv_char(RN4020_DEF_PTR rn4020, const uint8_t *uuid, uint8_t property,
-                                   uint8_t size, uint8_t security);
+extern int32_t rn4020_add_prv_char(RN4020_DEF_PTR rn4020, const uint8_t *uuid, uint8_t property,uint8_t size, uint8_t security);
 extern void rn4020_uuid_to_string(char *dest, const uint8_t *uuid, uint8_t len);
 extern RN4020_HANDLE_UUID_ITEM *rn4020_lookup_handle(RN4020_DEF_PTR rn4020, uint16_t handle);
 extern uint8_t rn4020_handle_match_uuid16(RN4020_HANDLE_UUID_ITEM *item, uint16_t uuid);
@@ -189,7 +188,10 @@ extern void rn4020_send(RN4020_DEF_PTR rn4020, const char *line);
 
 extern int32_t rn4020_server_write_pub_char(RN4020_DEF_PTR rn4020, uint16_t uuid, const uint8_t *data, uint32_t len);
 extern int32_t rn4020_server_write_prv_char(RN4020_DEF_PTR rn4020, const uint8_t *uuid, const uint8_t *data, uint32_t len);
+extern int32_t rn4020_server_read_prv_char(RN4020_DEF_PTR rn4020, const uint8_t *uuid, uint8_t *data, uint32_t len_limit);
 extern int32_t rn4020_server_write_pub_char_handle(RN4020_DEF_PTR rn4020, uint16_t handle, const uint8_t *data, uint32_t len);
+
+extern void rn4020_get_service(RN4020_DEF_PTR rn4020);
 
 /**
  * level 0x00 (0%) - 0x64 (100%)

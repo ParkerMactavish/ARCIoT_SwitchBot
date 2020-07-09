@@ -190,6 +190,7 @@ uint32_t hm1x_write(HM1X_DEF_PTR obj, uint8_t *buf, uint32_t cnt)
 	if(uart_obj == NULL){
 		return E_OBJ;
 	}
+  EMBARC_PRINTF("%s", buf);
 	return uart_obj->uart_write(buf, cnt);
 }
 

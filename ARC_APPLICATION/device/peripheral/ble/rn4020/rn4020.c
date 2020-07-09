@@ -37,8 +37,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
-
+// #define RN4020_INTERRUPT_DRIVERN
 #ifdef RN4020_INTERRUPT_DRIVERN
 static RN4020_DEF_PTR rn4020_ptr;
 #endif
@@ -167,6 +168,12 @@ static void _rn4020_line_parser(RN4020_DEF_PTR rn4020, const char *line)
 		return;
 	}
 
+  if (strncmp(line, "ConnP", 5) == 0){
+    DBG("ConnParam:%s", line);
+		_rn4020_set_state(rn4020, RN4020_STATE_READY);
+    return;
+  }
+
 	if (strncmp(line, "RV,", 3) == 0) {
 		strncpy(handle_str, line + 3, 4);
 		handle_str[4] = '\0';
@@ -271,19 +278,81 @@ static int32_t _rn4020_server_write_char(RN4020_DEF_PTR rn4020,
 
 	rn4020_uuid_to_string(line, uuid, uuid_len);
 	_rn4020_set_state(rn4020, RN4020_STATE_WAITING_FOR_AOK);
-
 	ez_sio_write(rn4020->sio_uart, "SUW,", 4);
+  DBG("SUW,");
 	ez_sio_write(rn4020->sio_uart, line, strlen(line));
+  DBG("%s", line);
 	ez_sio_write(rn4020->sio_uart, ",", 1);
+  DBG(",");
 
 	for (uint32_t i = 0; i < data_len; i++) {
 		sprintf(line, "%02X", data[i]);
 		ez_sio_write(rn4020->sio_uart, line, 2);
+    DBG("%02X", data[i]);
 	}
 
 	ez_sio_write(rn4020->sio_uart, "\n", 1);
+  DBG("\n");
 
 	return _rn4020_wait_for_ready(rn4020);
+}
+
+static int32_t _rn4020_server_read_char(RN4020_DEF_PTR rn4020,
+        const uint8_t *uuid, uint8_t uuid_len,
+              uint8_t *data, uint32_t len_limit)
+{
+	rn4020_uuid_to_string(data, uuid, uuid_len);
+	ez_sio_write(rn4020->sio_uart, "SUR,", 4);
+  // DBG("SUR,");
+	ez_sio_write(rn4020->sio_uart, data, strlen(data));
+  // DBG("%s", data);
+	
+  ez_sio_write(rn4020->sio_uart, "\n", 1);
+  // DBG("\n");
+
+  _rn4020_get_line(rn4020);
+  strcpy(data, rn4020->rx_buffer);
+
+  char handle_str[5];
+	uint16_t handle;    
+	// DBG("rx:%s\n", data);
+  rn4020->rx_cnt = 0;
+  if (strncmp(data, "WV,", 3) == 0) {
+		strncpy(handle_str, data + 3, 4);
+		handle_str[4] = '\0';
+		handle = strtol(handle_str, NULL, 16);
+    strcpy(data, data + 8);
+
+    uint8_t index = 0, len = strlen(data);
+    char tmpChar[2];
+
+    for(; index < len - 1; index += 2){
+      tmpChar[0] = data[index];
+      tmpChar[1] = data[index + 1];
+      if(tmpChar[0] < 0x3A)
+        tmpChar[0] -= '0';
+      else
+        tmpChar[0] -= 'A' - 10;
+      
+      if(tmpChar[1] < 0x3A)
+        tmpChar[1] -= '0';
+      else 
+        tmpChar[1] -= 'A' - 10;
+
+      tmpChar[0] = (tmpChar[0] << 4) + tmpChar[1];
+
+      data[index/2] = tmpChar[0];
+    }
+    data[index/2] = 0;
+
+    // DBG("handle:%04X\n", handle);
+    // DBG("data: %s\n", data);
+		return E_OK;
+	}
+  else{
+    data[0] = 0;
+  }
+  return E_SYS;
 }
 
 #ifdef RN4020_INTERRUPT_DRIVERN
@@ -547,7 +616,7 @@ EMBARC_WEAK void rn4020_on_realtime_read(RN4020_DEF_PTR rn4020, uint16_t handle)
 
 EMBARC_WEAK void rn4020_on_write(RN4020_DEF_PTR rn4020, uint16_t handle, uint8_t *data)
 {
-	EMBARC_PRINTF("write: 0x%04X:%s ", handle, data);
+	EMBARC_PRINTF("write: 0x%04X:%s \n", handle, data);
 }
 
 void rn4020_send(RN4020_DEF_PTR rn4020, const char *line)
@@ -570,6 +639,11 @@ int32_t rn4020_server_write_pub_char(RN4020_DEF_PTR rn4020, uint16_t uuid, const
 int32_t rn4020_server_write_prv_char(RN4020_DEF_PTR rn4020, const uint8_t *uuid, const uint8_t *data, uint32_t len)
 {
 	return _rn4020_server_write_char(rn4020, uuid, RN4020_PRIVATE_UUID_LENGTH_BYTES, data, len);
+}
+
+int32_t rn4020_server_read_prv_char(RN4020_DEF_PTR rn4020, const uint8_t *uuid, uint8_t *data, uint32_t len_limit)
+{
+	return _rn4020_server_read_char(rn4020, uuid, RN4020_PRIVATE_UUID_LENGTH_BYTES, data, len_limit);
 }
 
 int32_t rn4020_server_write_pub_char_handle(RN4020_DEF_PTR rn4020,
