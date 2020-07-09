@@ -10,23 +10,9 @@ Repo for Arc IoT contest containing the server and app of the system and the tes
 ## 系統架構
 <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/brief_architecture.PNG" width="90%" />
 
-## 硬體架構
+## 環境設定
 
-
-## 軟體架構
-#### 透過app控制裝置
-原本希望利用MQTT協定完成app和IOTDK之間的溝通，但是目前在IOTDK上的mqtt client架設遇到一些問題，
-因此只有app和伺服器之間的溝通是用MQTT，IOTDK和伺服器之間則是利用HTTP協定溝通，
-透過不停地像伺服器發送GET請求來取得app發送的指令。<br/>
-###### MQTT封包格式
-    {action:'reg', target:'Arduino-01'} //註冊ID為"Arduino-01"的裝置
-    {action:'trig', target:'Arduino-01'} //觸發ID為"Arduino-01"的裝置
-    {action:'del', target:'Arduino-01'} //刪除ID為"Arduino-01"的裝置
-###### HTTP回傳狀態
-     200: 成功取得app指令
-     204: app並沒有發送指令
-    
-
+   
 
 ## 使用說明
 #### Arc App - 裝置控制
