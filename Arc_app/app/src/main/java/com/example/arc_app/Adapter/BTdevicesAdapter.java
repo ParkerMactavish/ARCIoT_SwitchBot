@@ -14,33 +14,33 @@ import com.example.arc_app.R;
 
 import java.util.ArrayList;
 
-public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.OptionsHolder> {
+public class BTdevicesAdapter extends RecyclerView.Adapter<BTdevicesAdapter.OptionsHolder> {
     private LayoutInflater inflater;
-    private ArrayList<String> optDevices;
+    private ArrayList<String> btDevices;
     private Context mContext;
     private OptListener mOptListener;
 
-    public OptionsAdapter(Context ctx, ArrayList<String> regDevices){
+    public BTdevicesAdapter(Context ctx, ArrayList<String> btDevices){
         mContext = ctx;
         inflater = LayoutInflater.from(mContext);
-        this.optDevices = regDevices;
+        this.btDevices = btDevices;
     }
 
     @Override
-    public OptionsAdapter.OptionsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public BTdevicesAdapter.OptionsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.registered_devices_layout, parent, false);
         OptionsHolder holder = new OptionsHolder(view);
         return holder;
     }
 
     @Override
-    public void onBindViewHolder(OptionsAdapter.OptionsHolder holder, int position) {
-        holder.device.setText(optDevices.get(position));
+    public void onBindViewHolder(BTdevicesAdapter.OptionsHolder holder, int position) {
+        holder.device.setText(btDevices.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return optDevices.size();
+        return btDevices.size();
     }
 
     class OptionsHolder extends RecyclerView.ViewHolder{
@@ -54,18 +54,18 @@ public class OptionsAdapter extends RecyclerView.Adapter<OptionsAdapter.OptionsH
                 public void onClick(View v) {
                     final int index = getAdapterPosition();
                     new AlertDialog.Builder(mContext)
-                            .setTitle("註冊裝置?")
+                            .setTitle("和該裝置建立連線?")
                             .setPositiveButton("確認", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     mOptListener.onConfirm(index);
                                 }
                             }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    mOptListener.onCancel();
-                                }
-                             })
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            mOptListener.onCancel();
+                        }
+                    })
                             .create()
                             .show();
                 }
