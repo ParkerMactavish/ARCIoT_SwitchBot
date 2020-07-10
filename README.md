@@ -15,6 +15,9 @@ Repo for Arc IoT contest containing the server and app of the system and the tes
    
 
 ## 使用說明
+#### Arc IoTDK - 操作流程
+<img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/arc_flow.PNG" width="120%" />
+
 #### Arc App - 裝置控制
 <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app.jpg" width="20%" /> <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app_reg_mac.jpg" width="20%" /> <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app_del.jpg" width="20%" />
 
