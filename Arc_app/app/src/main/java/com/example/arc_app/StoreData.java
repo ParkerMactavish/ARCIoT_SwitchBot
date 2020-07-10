@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 
 import static com.example.arc_app.MainActivity.regDevices;
 import static com.example.arc_app.MainActivity.filename;
+import static com.example.arc_app.MainActivity.regDevicesMac;
 
 public class StoreData {
     private FileInputStream fin;
@@ -36,9 +37,15 @@ public class StoreData {
                 i++;
             }
             String[] array = (new String(temp,"utf-8")).split(" ");
-            for(String device : array)
-                if(!device.trim().isEmpty())
-                    regDevices.add(device);
+            for(String device : array) {
+                if (!device.trim().isEmpty()) {
+                    String[] pair = device.split("@");  //將device和mac切開
+                    regDevices.add(pair[0]);
+                    regDevicesMac.add(pair[1]);
+                    Log.d(TAG, "device: "+pair[0]);
+                    Log.d(TAG, "mac: "+pair[1]);
+                }
+            }
         } catch (Exception e) {
             Log.d(TAG,e.toString());
         }
@@ -59,9 +66,13 @@ public class StoreData {
         }
         //write data
         String data="";
+        int i = 0;
         for(String device : regDevices){
             data+=device;
+            data+="@";  //區隔device和mac
+            data+=regDevicesMac.get(i);
             data+=" ";
+            i++;
         }
         data.trim();
         try {

@@ -42,14 +42,15 @@ import com.example.arc_app.Adapter.OptionsAdapter;
 import com.example.arc_app.Adapter.RegisteredAdapter;
 import com.example.arc_app.MQTT.MqttManager;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     private static String TAG = "MainActivity";
     public static ArrayList<String> regDevices = new ArrayList<>();
+    public static ArrayList<String> regDevicesMac = new ArrayList<>();
     private ArrayList<String> optDevices = new ArrayList<>();
     private ArrayList<String> btDevices = new ArrayList<>();
     private ArrayList<BluetoothDevice>  btDevicesObj = new ArrayList<>();
@@ -77,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
     public static String filename = "datafile.txt";
     //for mqtt
     public static Handler handler_MQTT_message_receive;
-    private final String URL="tcp://192.168.43.222:3000";
+    private final String URL="tcp://192.168.137.128:3000";
     private final String clientId="Android_App";
     private String topic = "arc";
     private JSONObject payload;
@@ -94,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     private BluetoothManager bluetoothManager;
     private static final String targetUUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
+    private HashMap place = new HashMap();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,13 +175,13 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
         regAdapter.setRegListener(new RegisteredAdapter.RegListener() {
             @Override
-            public void onClick(String id) {
-                sendMsg("trig",id);
+            public void onClick(String id, int index) {
+                sendMsg("trig",id, index);
             }
 
             @Override
-            public void onDelete(String id) {
-                sendMsg("del",id);
+            public void onDelete(String id, int index) {
+                sendMsg("del",id, index);
             }
         });
     }
@@ -199,18 +201,21 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView recyclerView = dialog.findViewById(R.id.optRecycler);
         final EditText devicename = dialog.findViewById(R.id.device_name);
+        final EditText devicemac = dialog.findViewById(R.id.device_mac);
         optAdapter = new OptionsAdapter(MainActivity.this,optDevices);
         optAdapter.setOptListener(new OptionsAdapter.OptListener(){
             @Override
             public void onConfirm(int which){
                 String name = devicename.getText().toString().trim();
-                if(name == null || name.isEmpty()){
-                    Toast toast = Toast.makeText(MainActivity.this, "請輸入裝置ID",Toast.LENGTH_SHORT);
+                String mac = devicemac.getText().toString().trim();
+                if(name == null || name.isEmpty() || mac == null || mac.isEmpty()){
+                    Toast toast = Toast.makeText(MainActivity.this, "請輸入裝置ID和MAC",Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER,0,0);
                     toast.show();
                 }
                 else {
                     deviceChosed = new Pair<>(name, optDevices.get(which));
+                    regDevicesMac.add(mac);
                     updateDevice();
                     dialog.dismiss();
                 }
@@ -229,27 +234,59 @@ public class MainActivity extends AppCompatActivity {
         toast.setGravity(Gravity.CENTER,0,0);
         toast.show();
         regAdapter.addData(deviceChosed.first+"/"+deviceChosed.second);
-        sendMsg("reg",deviceChosed.first);
+        sendMsg("reg",deviceChosed.first, regDevices.size()-1);
     }
 
     private void initMqttHandler(){
         handler_MQTT_message_receive = new Handler(Looper.getMainLooper()){
             public void handleMessage(Message message) {
                 super.handleMessage(message);
-                if(message.what == 0){}
-                else{}
+                if(message.what == 1){
+                    //connection built
+                    //send stored devices and mac to server
+                    payload = new JSONObject();
+                    Log.d(TAG,"send stored devices and mac to server ...");
+                    for(int i=0; i<regDevices.size(); i++) {
+                        final int index = i;
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    String device = regDevices.get(index);
+                                    String mplace = device.split("/")[1];
+                                    String result = device.split("/")[0];
+                                    result += "/";
+                                    result += place.get(mplace);
+                                    result += "@";
+                                    result += regDevicesMac.get(index);
+                                    payload.put("target", result);
+                                    MqttManager.getInstance().publish("init", 2, payload.toString().getBytes());
+                                } catch (Exception e) {
+                                    Log.d(TAG, e.toString());
+                                }
+                            }
+                        }).start();
+                    }
+                }
             }
         };
     }
 
-    private void sendMsg(String action, String id){
+    private void sendMsg(String action, String id, int index){
         //action: trig/reg/del
         //target: (device id)
         payload = new JSONObject();
         Log.d(TAG,"sendMsg: "+action+"/"+id);
         try {
+            String device = regDevices.get(index);
+            String mplace = device.split("/")[1];
+            String result = id;
+            result += "/";
+            result += place.get(mplace);
+            result += "@";
+            result += regDevicesMac.get(index);
             payload.put("action", action);
-            payload.put("target", id);
+            payload.put("target", result);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -485,9 +522,24 @@ public class MainActivity extends AppCompatActivity {
                         Log.d(TAG,"======== connection established ========");
                         linkLossService=bluetoothGattService;
                         alertLevel=gattCharacteristic;
-                        Toast toast = Toast.makeText(MainActivity.this, "成功建立連線",Toast.LENGTH_SHORT);
-                        toast.setGravity(Gravity.CENTER,0,0);
-                        toast.show();
+                        new Thread(new Runnable(){
+                            @Override
+                            public void run(){
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Log.d(TAG, "connecting to BLE device");
+                                        try {
+                                            Toast toast = Toast.makeText(MainActivity.this, "成功建立連線",Toast.LENGTH_SHORT);
+                                            toast.setGravity(Gravity.CENTER,0,0);
+                                            toast.show();
+                                        }catch (Exception e){
+                                            Log.d(TAG, e.toString());
+                                        }
+                                    }
+                                });
+                            }
+                        }).start();
                     }
                 }
 
@@ -534,20 +586,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private  void setTestdata(){
-//        regDevices.add("A");
-//        regDevices.add("B");
-//        regDevices.add("C");
-//        regDevices.add("D");
-//        regDevices.add("E");
-//        regDevices.add("F");
-//        regDevices.add("G");
-//        regDevices.add("H");
-//        regDevices.add("I");
-//        regDevices.add("J");
-//        regDevices.add("K");
-//        regDevices.add("L");
-//        regDevices.add("M");
-
         optDevices.add("廚房");
         optDevices.add("客廳");
         optDevices.add("大門");
@@ -555,13 +593,12 @@ public class MainActivity extends AppCompatActivity {
         optDevices.add("玄關");
         optDevices.add("餐廳");
 
-        ID.add("AEF1932d");
-        ID.add("FAMS1242");
-        ID.add("ZZF193as");
-        ID.add("EIQF1O2d");
-        ID.add("PQ129324");
-        ID.add("AOQ12325");
-        ID.add("YRF1N801");
+        place.put("廚房",0);
+        place.put("客廳",1);
+        place.put("大門",2);
+        place.put("書房",3);
+        place.put("玄關",4);
+        place.put("餐廳",5);
     }
 
     @Override
@@ -589,5 +626,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+    }
+
 }
 

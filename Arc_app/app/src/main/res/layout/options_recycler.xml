@@ -15,6 +15,15 @@
         android:textSize="25sp"
         android:hint="裝置ID" />
 
+    <EditText
+        android:id="@+id/device_mac"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:textSize="25sp"
+        android:hint="裝置MAC" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/optRecycler"
         android:layout_width="match_parent"
