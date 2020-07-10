@@ -36,11 +36,18 @@
 // #include "rn4020.h"
 #include "cc2541.h"
 
+#include "Spotter.h"
+#include "recorder.h"
+#include "CYBase.mod.h"
+#include "Group_1.mod.h"
+#include "Group_2.mod.h"
+
 #include "dev_uart.h"
 #include "ez_sio.h"
 
 #include <stdio.h>
 #include <string.h>
+
 
 /* RN4020 Pin Define */
 /*
@@ -75,9 +82,9 @@ char ssid[100];
 char pswd[100];
 static char http_normal_req[] = "GET / HTTP/1.1\r\n\r\n";
 static char http_initial_req[] = "GET /all HTTP/1.1\r\n\r\n";
-static char server_ip[] = "192.168.137.1";
-static int server_ip = 5000;
-static char http_client_buf[2048];
+static char server_ip[] = "192.168.137.128";
+static int server_port = 5000;
+static char http_client_buf[512];
 uint8_t trialNum;
 /* End ESP8266 Buffer Define */
 
@@ -91,6 +98,32 @@ uint8_t trialNum;
 // char hm10_rxbf[200];
 cc2541_def* cc2541;
 /* End HM10 Buffer Define */
+
+/* DSpotter Memory Define */
+//use fixed size memory to avoid heap too small
+#define pMem ((void*)0x30000000)
+#define nMemSize (0x00020000)
+#define RECORD_TIMEOUT  5000
+int16_t* pData;
+uint32_t spottedMS;
+uint8_t recNum = 0xff;
+/* End DSPotter Memory Define */
+
+/* MAC Addr Buffer Define */
+char MACAddrArr[6][13];
+/* End MAC Addr Buffer Define */
+
+static int initRecognize(){
+	int nRet;
+	nRet= Recorder_Init();
+	if(nRet!= 0){
+		printf("record init fail: %d\r\n", nRet);
+		return 1;
+	}
+	Spotter_Reset();
+	Recorder_Start();	
+	return nRet;
+}
 
 int main(void)
 {
@@ -117,6 +150,9 @@ int main(void)
 
 	/* ESP8266 Connect Wifi */
 	EMBARC_PRINTF("============================ Connect WiFi ============================\n");
+  esp8266_passthr_end(esp8266);
+  board_delay_ms(1050, 1);
+  // EMBARC_PRINTF("%d\n", esp8266_conn_status(esp8266));
   while(esp8266->wifi_connected == false){
     for(trialNum = 0; trialNum < ESP8266_MAX_CONN_TRIAL; trialNum ++){
       if(esp8266_conn_status(esp8266) == ESP8266_WIFI_CONN_SUCCESS)
@@ -131,27 +167,36 @@ int main(void)
       memset(ssid, 0, 100);
       memset(pswd, 0, 100);
       memset(cc2541->rxBuff, 0, 200);
-      ssid[0] = '\"';
-      pswd[0] = '\"';
-      char* input;
+      // ssid[0] = '\"';
+      // pswd[0] = '\"';
       while(ssid[1] == 0 || pswd[1] == 0){
-        cc2541_read(cc2541);
-
-        if(cc2541->rxBuff[0]){
-          input = cc2541->rxBuff;
-          EMBARC_PRINTF("Connected: %s\n", input);
-        }
-        if(input[0] == 's'){
-          sscanf(input, "ssid:%s", ssid + 1);
-          strcat(ssid, "\"");
-        }
-        else if(input[0] == 'p'){
-          sscanf(input, "pswd:%s", pswd + 1);
-          strcat(pswd, "\"");
-        }
+        // if(rb_isempty(&cc2541->uart->rcv_rb) == 0){
+          cc2541_read(cc2541);
+          if(cc2541->rxBuff[0]){
+            char* token = strtok(cc2541->rxBuff, ";");
+            sprintf(ssid, "\"%s\"", token);
+            token = strtok(NULL, "\n");
+            sprintf(pswd, "\"%s\"", token);
+            EMBARC_PRINTF("Connected: %s\n", cc2541->rxBuff);
+          }
+          // else{
+          //   input[0] = 0;
+          // }
+          board_delay_ms(100, 1);
+          // EMBARC_PRINTF("Expected\n");
+          // if(input[0] == 's'){
+          //   sscanf(input, "ssid:%s", ssid + 1);
+          //   strcat(ssid, "\"");
+          // }
+          // else if(input[0] == 'p'){
+          //   sscanf(input, "pswd:%s", pswd + 1);
+          //   strcat(pswd, "\"");
+          // }
+        // }
+        // EMBARC_PRINTF("Expected\n");
       }
+      esp8266_wifi_connect(esp8266, ssid, pswd, true);
     }
-    esp8266_wifi_connect(esp8266, ssid, pswd, true);
   }
 
   while(cc2541_test_AT(cc2541) != 0)
@@ -164,17 +209,74 @@ int main(void)
 	/* ESP8266 Connect Server */
 	EMBARC_PRINTF("============================ Connect to Server ============================\n");
 
-	if(esp8266_tcp_connect(esp8266, server_ip, server_ip)!=AT_ERROR){
+	if(esp8266_tcp_connect(esp8266, server_ip, server_port)!=AT_ERROR){
     board_delay_ms(1000, 1);
     esp8266_passthr_start(esp8266);
+    memcpy(MACAddrArr[0], "882583F020A8", 12);
   }
   /* End ESP8266 Connect Server */
+  
+  /* CC2541 Connect */
+  ez_sio_write(cc2541->uart, "AT+INQ\r\n", 9);
+  board_delay_ms(10000, 1);
+  ez_sio_write(cc2541->uart, "AT+CONN1\r\n", 11);
+  /* End CC2541 Connect */
 
-	while (1) {
-    esp8266_passthr_write(esp8266, http_client_req, sizeof(http_client_req)-1);
-	  memset(http_client_buf, 0, 2048);
-    at_read(esp8266->p_at, http_client_buf, 2048);
-    EMBARC_PRINTF("Received: %s\n", http_client_buf);
+  int nRet;
+	printf("\r\nDSpotter version: %s\r\n", Spotter_GetVersion());
+
+	nRet= Spotter_Init((void*)pCYBase_mod, (const void*[]){(void*)pGroup_1_mod, (void*)pGroup_2_mod, 0}, pMem, nMemSize);
+	if(nRet!= 0){
+		goto Exit;
 	}
+	Spotter_Reset();
+	printf("Begin recognize\r\n");
+  memset(cc2541->rxBuff, 0, 200);
+  initRecognize();
+	while (1) {    
+		pData= Recorder_GetBuffer();
+		if(pData== 0) continue;
+		nRet= Spotter_AddSample(pData, Recorder_GetBufferSize());
+		if(nRet== SPOTTER_SUCCESS){
+			int gpID = Spotter_GetResultGroupId(),
+          cmdID = Spotter_GetResultId();
+      printf("Spotter detect result gpID=%d cmdID=%d\n", gpID, cmdID);//辨識成功會在這邊顯示
+      if(gpID == 0){
+        recNum = 0x80;
+        spottedMS = OSP_GET_CUR_MS();
+      }
+      else if(gpID == 1 && recNum == 0x80){
+        recNum = cmdID;
+      }
+		}
+    if(OSP_GET_CUR_MS() - spottedMS > RECORD_TIMEOUT && recNum == 0x80){
+      printf("Timed out\n");
+      recNum = 0xff;
+    }
+    if(recNum < 0x80){
+      printf("Second Stage%d\n", recNum);
+      ez_sio_write(cc2541->uart, (recNum == 0)?"on":"off", 3);
+      int index = 0;
+      recNum=0xfe;
+    }
+    Recorder_NextBuffer();
+    uint32_t cpu_status = cpu_lock_save();
+    cpu_unlock_restore(cpu_status);
+    esp8266_passthr_write(esp8266, http_normal_req, sizeof(http_normal_req)-1);
+    at_read(esp8266->p_at, http_client_buf, 512);
+    if(strstr(http_client_buf, "reg")){
+      EMBARC_PRINTF("%s", http_client_buf);
+    }
+    else if(strstr(http_client_buf, "trig")){
+      EMBARC_PRINTF("######START:%s", http_client_buf);
+      ez_sio_write(cc2541->uart, "on", 2);
+    }
+	  memset(http_client_buf, '\0', 512);
+  }
+  Recorder_Stop();
+	Recorder_Release();
+	printf("Done\r\n");
+Exit:
+ 	Spotter_Release();
 	return E_OK;
 }

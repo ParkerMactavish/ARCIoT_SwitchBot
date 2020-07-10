@@ -73,11 +73,14 @@ uint32_t cc2541_read(cc2541_def* cc2541){
     cc2541->rxBuff[cur_ofs - 1] = '\0';
     
   }*/
-  EMBARC_PRINTF("CC2541: \"%s\" (%d)\r\n", cc2541->rxBuff, strlen(cc2541->rxBuff));
-
-  if (cc2541->rxBuff[0] == NULL)
+  
+  if (cc2541->rxBuff[0] == 0){
+    EMBARC_PRINTF("CC2541: EMPTY STRING\n");
     return -2;
-	else if (strstr(cc2541->rxBuff, "OK")!= NULL)
-		return 0;
+  }
+	else if (strstr(cc2541->rxBuff, "OK")!= NULL){
+    EMBARC_PRINTF("CC2541: \"%s\" (%d)\r\n", cc2541->rxBuff, strlen(cc2541->rxBuff));
+    return 0;
+  }
 	else return -1;
 }

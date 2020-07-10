@@ -320,7 +320,7 @@ int32_t esp8266_passthr_end(ESP8266_DEF_PTR obj)
 int32_t esp8266_passthr_write(ESP8266_DEF_PTR obj, char *buf, uint32_t cnt)
 {
 	if (obj->wifi_connected && obj->trans_mode == ESP8266_PASSTHR) {
-    return at_write(obj->p_at, buf, cnt);
+		return at_write(obj->p_at, buf, cnt);
 	}
 
 	return AT_ERROR;

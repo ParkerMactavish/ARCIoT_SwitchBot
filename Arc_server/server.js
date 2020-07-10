@@ -1,7 +1,7 @@
 var http = require('http');
 const mosca = require('mosca');
 
-var flag = false;   //is msg valid
+var flag = true;   //is msg valid
 var msg = "none";
 
 //http server
