@@ -19,7 +19,7 @@ Repo for Arc IoT contest containing the server and app of the system and the tes
 <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app.jpg" width="20%" /> <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app_reg_mac.jpg" width="20%" /> <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app_del.jpg" width="20%" />
 
 1. 在app首頁可以看到已註冊的裝置。
-2. 點擊"新裝置"按鈕，可以輸入裝置ID進行註冊。
+2. 點擊"新裝置"按鈕，可以輸入裝置ID和MAC進行註冊。
 3. 短按為觸發裝置，長按為刪除裝置。
 #### Arc App - wifi設定
 <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app_BLEscan.jpg" width="20%" /> <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/ARC_app_BLEconnect.jpg" width="20%" /> <img src="https://github.com/LittleLaGi/ARCIoT_SwitchBot/blob/master/Arc_app_wifi_setup.jpg" width="20%" />
