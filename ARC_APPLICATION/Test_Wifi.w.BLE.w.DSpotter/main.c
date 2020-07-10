@@ -80,9 +80,9 @@ ESP8266_DEFINE(esp8266);
 /* ESP8266 Buffer Define */
 char ssid[100];
 char pswd[100];
-static char http_normal_req[] = "GET / HTTP/1.1\r\n\r\n";
+static char http_normal_req[] = "GET / HTTP/1.1\r\n\r\n\r\n";
 static char http_initial_req[] = "GET /all HTTP/1.1\r\n\r\n";
-static char server_ip[] = "192.168.137.128";
+static char server_ip[] = "192.168.137.1";
 static int server_port = 5000;
 static char http_client_buf[512];
 uint8_t trialNum;
@@ -211,7 +211,8 @@ int main(void)
 
 	if(esp8266_tcp_connect(esp8266, server_ip, server_port)!=AT_ERROR){
     board_delay_ms(1000, 1);
-    esp8266_passthr_start(esp8266);
+    int retVal = esp8266_passthr_start(esp8266);
+    EMBARC_PRINTF("Succedd? %d", retVal);
     memcpy(MACAddrArr[0], "882583F020A8", 12);
   }
   /* End ESP8266 Connect Server */
@@ -232,6 +233,7 @@ int main(void)
 	Spotter_Reset();
 	printf("Begin recognize\r\n");
   memset(cc2541->rxBuff, 0, 200);
+  uint32_t startMS = OSP_GET_CUR_MS();
   initRecognize();
 	while (1) {    
 		pData= Recorder_GetBuffer();
@@ -260,18 +262,19 @@ int main(void)
       recNum=0xfe;
     }
     Recorder_NextBuffer();
-    uint32_t cpu_status = cpu_lock_save();
-    cpu_unlock_restore(cpu_status);
-    esp8266_passthr_write(esp8266, http_normal_req, sizeof(http_normal_req)-1);
-    at_read(esp8266->p_at, http_client_buf, 512);
-    if(strstr(http_client_buf, "reg")){
-      EMBARC_PRINTF("%s", http_client_buf);
-    }
-    else if(strstr(http_client_buf, "trig")){
-      EMBARC_PRINTF("######START:%s", http_client_buf);
-      ez_sio_write(cc2541->uart, "on", 2);
-    }
-	  memset(http_client_buf, '\0', 512);
+    if(OSP_GET_CUR_MS()  - startMS > 2000){
+      esp8266_passthr_write(esp8266, http_normal_req, sizeof(http_normal_req) );
+      at_read(esp8266->p_at, http_client_buf, 512);
+      if(strstr(http_client_buf, "reg")){
+        EMBARC_PRINTF("%s", http_client_buf);
+      }
+      else if(strstr(http_client_buf, "trig")){
+        EMBARC_PRINTF("######START:%s\n", http_client_buf);
+        ez_sio_write(cc2541->uart, "on", 2);
+      }
+      memset(http_client_buf, '\0', 512);
+      startMS = OSP_GET_CUR_MS();
+    }    
   }
   Recorder_Stop();
 	Recorder_Release();
