@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.arc_app.R;
+import static com.example.arc_app.MainActivity.regDevicesMac;
 
 import java.util.ArrayList;
 
@@ -53,6 +54,7 @@ public class RegisteredAdapter extends RecyclerView.Adapter<RegisteredAdapter.Re
     }
     public void removeData(int position) {
         regDevices.remove(position);
+        regDevicesMac.remove(position);
         notifyItemRemoved(position);
         notifyDataSetChanged();
     }
@@ -71,7 +73,7 @@ public class RegisteredAdapter extends RecyclerView.Adapter<RegisteredAdapter.Re
                     toast.setGravity(Gravity.CENTER,0,0);
                     toast.show();
                     String array[] = deviceName.split("/");
-                    mRegListener.onClick(array[0]);
+                    mRegListener.onClick(array[0], getAdapterPosition());
                 }
             });
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -88,7 +90,7 @@ public class RegisteredAdapter extends RecyclerView.Adapter<RegisteredAdapter.Re
                                     toast.show();
                                     String array[] = regDevices.get(index).split("/");
                                     try {
-                                        mRegListener.onDelete(array[0]);
+                                        mRegListener.onDelete(array[0],index);
                                     }catch (Exception e){
                                         Log.d(TAG, e.toString());
                                     }
@@ -112,8 +114,8 @@ public class RegisteredAdapter extends RecyclerView.Adapter<RegisteredAdapter.Re
         mRegListener = regListener;
     }
     public interface RegListener{
-        void onClick(String id);
-        void onDelete(String id);
+        void onClick(String id, int index);
+        void onDelete(String id, int index);
     }
 
 }
